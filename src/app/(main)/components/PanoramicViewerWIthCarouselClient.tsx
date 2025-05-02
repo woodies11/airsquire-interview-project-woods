@@ -14,7 +14,7 @@ export interface PanoramicViewerWithCarouselProps {
   }[]
 }
 
-export default function PanoramicViewerWithCarousel({
+export default function PanoramicViewerWithCarouselClient({
   defaultImageUrl,
   imageData,
 }: PanoramicViewerWithCarouselProps) {
@@ -26,7 +26,9 @@ export default function PanoramicViewerWithCarousel({
   return (
     <Container className="pt-4">
       <PanoramicViewer imageUrl={selectedImageUrl} />
-      <div className="mt-4 flex w-full gap-4">
+
+      {/* Image Picker Carousel */}
+      <div className="mt-4 flex w-full gap-4 overflow-y-scroll max-w-full">
         {imageData.map((item: any) => {
           const { name, imageUrl } = item
 

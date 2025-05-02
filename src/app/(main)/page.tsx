@@ -1,5 +1,5 @@
 import 'server-only'
-import PanoramicViewerWithCarousel from './components/PanoramicViewerWIthCarousel'
+import PanoramicViewerWithCarouselClient from './components/PanoramicViewerWIthCarouselClient'
 
 export default async function Page() {
   const res = await fetch('http://localhost:3000/api/panoramas')
@@ -7,5 +7,5 @@ export default async function Page() {
 
   const defaultImageUrl = data[0]?.imageUrl || '/panorama/building.jpg'
 
-  return <PanoramicViewerWithCarousel imageData={data} defaultImageUrl={defaultImageUrl} />
+  return <PanoramicViewerWithCarouselClient imageData={data} defaultImageUrl={defaultImageUrl} />
 }
