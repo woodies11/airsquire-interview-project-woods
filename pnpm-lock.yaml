@@ -14,6 +14,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@airsquire/common':
+        specifier: workspace:*
+        version: link:../../packages/common
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -60,6 +63,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@airsquire/common':
+        specifier: workspace:*
+        version: link:../../packages/common
       '@tailwindcss/postcss':
         specifier: ^4.1.5
         version: 4.1.5
@@ -103,6 +109,8 @@ importers:
       typescript:
         specifier: 5.8.3
         version: 5.8.3
+
+  packages/common: {}
 
 packages:
 

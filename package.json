@@ -1,6 +1,7 @@
 {
   "name": "airsquire-interview-project-woods",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "typescript": "^5.8.3"
   },

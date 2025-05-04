@@ -1,6 +1,7 @@
+import { ImageMeta } from '@airsquire/common/src/models/ImageMeta.js'
 import express from 'express'
 import fileUpload from 'express-fileupload'
-import { ImageMeta, images } from '../db.js'
+import { images } from '../db.js'
 
 const router = express.Router()
 

@@ -1,3 +1,4 @@
+import { ImageMeta } from '@airsquire/common/src/models/ImageMeta.js'
 import dotenv from 'dotenv'
 import { Collection, Db, MongoClient } from 'mongodb'
 
@@ -8,14 +9,3 @@ await client.connect()
 
 export const db: Db = client.db('airsquire')
 export const images: Collection<ImageMeta> = db.collection('panoramas')
-
-export interface ImageMeta {
-  _id?: string
-  originalName: string
-  storedName: string
-  path: string
-  size: number
-  mimetype: string
-  bookmarked: boolean
-  uploadedAt: Date
-}
