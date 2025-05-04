@@ -1,0 +1,16 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    container_name: airsquire-mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mk8WsrFZv6os4aYCvm@X!u*ZvV-8h*uwh9fZcM**T.*ojf
+
+volumes:
+  mongo-data:
+    driver: local
