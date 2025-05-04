@@ -1,10 +1,10 @@
 /**
- * Return a list of all paranomas
+ * Return a list of all panoramas
  * @param request
  */
 export async function GET(request: Request) {
-  // for now, we will just return a static list of paranomas
-  const paranomas = [
+  // for now, we will just return a static list of panoramas
+  const panoramas = [
     {
       id: 1,
       name: 'Building',
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       imageUrl: '/panorama/sea.jpg',
     },
   ]
-  return new Response(JSON.stringify(paranomas), {
+  return new Response(JSON.stringify(panoramas), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
