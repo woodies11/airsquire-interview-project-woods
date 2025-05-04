@@ -28,5 +28,6 @@
     "@types/react": "19.1.2",
     "@types/three": "^0.176.0",
     "typescript": "5.8.3"
-  }
+  },
+  "packageManager": "pnpm@8.6.0"
 }
