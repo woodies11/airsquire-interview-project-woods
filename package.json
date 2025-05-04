@@ -13,10 +13,12 @@
   "license": "ISC",
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.5",
+    "antd": "^5.24.9",
     "next": "^15.3.1",
     "postcss": "^8.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
     "tailwindcss": "^4.1.5",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.176.0"

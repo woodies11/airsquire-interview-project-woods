@@ -101,9 +101,10 @@ export default function PanoramicViewer({ imageUrl }: PanoramicViewerProps) {
   return (
     <div
       ref={canvasRef}
-      className="bg-slate-500 w-full min-h-[50vh] max-h-[60vh] cursor-grab active:cursor-grabbing relative touch-none -z-20"
+      className="w-full min-h-[50vh] max-h-[60vh] cursor-grab active:cursor-grabbing relative touch-none"
     >
       <span className="absolute top-1/2 left-1/2 -translate-1/2 -z-10 text-white">Loading...</span>
+      <div className="bg-slate-500 absolute inset-0 -z-20"></div>
     </div>
   )
 }
