@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   WebGLRenderer,
   Scene,
@@ -13,13 +13,16 @@ import {
 import { OrbitControls } from 'three/addons/controls/OrbitControls'
 
 export interface PanoramicViewerProps {
-  imageUrl: string
+  imgSrc: string
 }
 
-export default function PanoramicViewer({ imageUrl }: PanoramicViewerProps) {
+export default function PanoramicViewer({ imgSrc: imageUrl }: PanoramicViewerProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!imageUrl) return
+    if (!canvasRef.current) return
+
     const scene = new Scene()
     const camera = new PerspectiveCamera(
       75,
@@ -34,7 +37,40 @@ export default function PanoramicViewer({ imageUrl }: PanoramicViewerProps) {
     // Position camera inside the sphere
     camera.position.set(0, 0, 0.1)
 
-    // Load panoramic texture
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableZoom = false
+    controls.enablePan = false
+    controls.rotateSpeed = -0.25
+    controls.enableDamping = true
+    controls.dampingFactor = 0.5
+    controls.autoRotate = true
+    controls.autoRotateSpeed = 0.25
+
+    let inactivityTimeout: ReturnType<typeof setTimeout> | null = null
+    const resetInactivityTimer = () => {
+      if (inactivityTimeout) clearTimeout(inactivityTimeout)
+      inactivityTimeout = setTimeout(() => {
+        controls.autoRotate = true
+      }, 2000)
+    }
+
+    controls.addEventListener('end', () => resetInactivityTimer())
+
+    controls.addEventListener('start', () => {
+      controls.autoRotate = false
+      resetInactivityTimer()
+    })
+
+    controls.update()
+
+    // Render loop
+    let frameId: number
+    const animate = () => {
+      frameId = requestAnimationFrame(animate)
+      renderer.render(scene, camera)
+      controls.update()
+    }
+
     const loader = new TextureLoader()
     loader.load(imageUrl, texture => {
       const geometry = new SphereGeometry(500, 60, 40)
@@ -42,42 +78,6 @@ export default function PanoramicViewer({ imageUrl }: PanoramicViewerProps) {
       const material = new MeshBasicMaterial({ map: texture })
       const mesh = new Mesh(geometry, material)
       scene.add(mesh)
-
-      const controls = new OrbitControls(camera, renderer.domElement)
-      controls.enableZoom = false
-      controls.enablePan = false
-      controls.rotateSpeed = -0.25
-      controls.enableDamping = true
-      controls.dampingFactor = 0.5
-      controls.autoRotate = true
-      controls.autoRotateSpeed = 0.25
-
-      let inactivityTimeout: ReturnType<typeof setTimeout> | null = null
-
-      const resetInactivityTimer = () => {
-        if (inactivityTimeout) clearTimeout(inactivityTimeout)
-        inactivityTimeout = setTimeout(() => {
-          controls.autoRotate = true
-        }, 2000)
-      }
-
-      controls.addEventListener('end', () => {
-        resetInactivityTimer()
-      })
-
-      controls.addEventListener('start', () => {
-        controls.autoRotate = false
-        resetInactivityTimer()
-      })
-
-      controls.update()
-
-      // Render loop
-      const animate = () => {
-        requestAnimationFrame(animate)
-        renderer.render(scene, camera)
-        controls.update()
-      }
       animate()
     })
 
@@ -92,11 +92,36 @@ export default function PanoramicViewer({ imageUrl }: PanoramicViewerProps) {
     window.addEventListener('resize', handleResize)
 
     return () => {
+      // Stop the animation loop
+      if (frameId) {
+        cancelAnimationFrame(frameId)
+      }
+
+      // Clean up event listeners
+      controls.removeEventListener('start', resetInactivityTimer)
+      controls.removeEventListener('end', resetInactivityTimer)
       window.removeEventListener('resize', handleResize)
+
+      // clear the inactivity timeout
+      if (inactivityTimeout) {
+        clearTimeout(inactivityTimeout)
+        inactivityTimeout = null
+      }
+
+      // Remove canvas, either from parent node or from canvasRef
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement)
+      }
+      if (canvasRef.current?.contains(renderer.domElement)) {
+        canvasRef.current.removeChild(renderer.domElement)
+      }
+
+      // Free up memory and resources
       renderer.dispose()
-      canvasRef.current?.removeChild(renderer.domElement)
+      controls.dispose()
+      scene.clear()
     }
-  }, [canvasRef.current, imageUrl])
+  }, [imageUrl])
 
   return (
     <div
