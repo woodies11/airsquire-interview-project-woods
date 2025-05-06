@@ -1,7 +1,7 @@
 import cors from 'cors'
 import express from 'express'
 import path from 'path'
-import uploadRoutes from './routes/uploads.js'
+import imagesRoutes from './routes/images.js'
 
 const app = express()
 const PORT = 4000
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/api/uploads', uploadRoutes)
+app.use('/api/images', imagesRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)

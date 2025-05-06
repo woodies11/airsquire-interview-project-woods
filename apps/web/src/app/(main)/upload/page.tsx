@@ -50,7 +50,7 @@ export default function UploadPage() {
     }
     const { files, ...formData } = data
 
-    const result = await fetch(`${BASE_URL}/api/uploads`, {
+    const result = await fetch(`${BASE_URL}/api/images`, {
       method: 'PATCH',
       body: JSON.stringify({
         id: uploadId,
@@ -62,37 +62,6 @@ export default function UploadPage() {
     })
     const res = await result.json()
     console.log('res', res)
-
-    // try {
-    //   const formData = new FormData()
-    //   formData.append('file', file as Blob)
-    //   formData.append('name', form.getFieldValue('name') || '')
-    //   formData.append('description', form.getFieldValue('description') || '')
-    //   formData.append('tags', form.getFieldValue('tags') || '')
-
-    //   setUploading(true)
-
-    //   const res = await fetch('/api/upload', {
-    //     method: 'POST',
-    //     body: formData,
-    //   })
-
-    //   const result = await res.json()
-
-    //   if (res.ok) {
-    //     message.success('Upload successful')
-    //     onSuccess?.(result, new XMLHttpRequest())
-    //     form.resetFields()
-    //   } else {
-    //     message.error(result.error || 'Upload failed')
-    //     onError?.(new Error(result.error || 'Upload failed'))
-    //   }
-    // } catch (err) {
-    //   message.error('Unexpected error')
-    //   onError?.(err as Error)
-    // } finally {
-    //   setUploading(false)
-    // }
   }
 
   return (
@@ -117,7 +86,7 @@ export default function UploadPage() {
             rules={[{ required: true, message: 'Please upload a panoramic image' }]}
           >
             <Upload
-              action={`http://localhost:4000/api/uploads`}
+              action={`http://localhost:4000/api/images`}
               accept="image/*"
               maxCount={1}
               showUploadList={false}
