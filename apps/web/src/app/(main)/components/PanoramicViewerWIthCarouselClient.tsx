@@ -25,7 +25,7 @@ export default function PanoramicViewerWithCarouselClient({
 
   return (
     <Container className="pt-4">
-      <PanoramicViewer imageUrl={selectedImageUrl} />
+      <PanoramicViewer imgSrc={selectedImageUrl} />
 
       {/* Image Picker Carousel */}
       <div className="mt-4 flex w-full gap-4 overflow-y-scroll max-w-full">
