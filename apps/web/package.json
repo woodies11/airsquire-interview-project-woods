@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@airsquire/common": "workspace:*",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@tailwindcss/postcss": "^4.1.5",
     "antd": "^5.24.9",
     "next": "^15.3.1",
