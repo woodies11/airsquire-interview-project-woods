@@ -134,7 +134,9 @@ router.post('/', async (req: any, res: any) => {
           dateEnriched: new Date(),
           model: 'gpt-4o-mini-2024-07-18',
         },
-      }
+      },
+    }
+  )
 })
 
 const EnrichmentResponse = zodResponseFormat(
