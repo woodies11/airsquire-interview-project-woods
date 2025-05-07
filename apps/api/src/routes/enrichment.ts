@@ -5,6 +5,7 @@ import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 import path from 'path'
+import sharp from 'sharp'
 import { z } from 'zod'
 import { dbImagesCollection } from '../db.js'
 
@@ -51,7 +52,14 @@ router.post('/', async (req: any, res: any) => {
   const { imageUrl } = image
 
   const fileData = fs.readFileSync(imageUrl)
-  const base64 = fileData.toString('base64')
+
+  // Limit image size to speed up AI processing
+  const imageBuffer = await sharp(fileData)
+    .resize({ height: 1920, withoutEnlargement: true })
+    .jpeg({ quality: 80 })
+    .toBuffer()
+
+  const base64 = imageBuffer.toString('base64')
   const ext = path.extname(imageUrl).substring(1)
   const mime = ext === 'jpg' ? 'jpeg' : ext // base64 encoding for jpg is 'jpeg'
   const base64Image = `data:image/${mime};base64,${base64}`
@@ -159,6 +167,7 @@ async function* describeImage(messages: ChatCompletionMessageParam[]) {
     temperature: 0.3,
     stream: true,
   })
+  console.log('received responseStream...')
 
   for await (const chunk of responseStream) {
     const content = chunk.choices?.[0]?.delta?.content
@@ -174,6 +183,7 @@ async function* generateEnrichmentJSON(messages: ChatCompletionMessageParam[]) {
     response_format: EnrichmentResponse,
     stream: true,
   })
+  console.log('received responseStream...')
 
   for await (const chunk of responseStream) {
     const content = chunk.choices?.[0]?.delta?.content

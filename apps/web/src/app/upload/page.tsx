@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Form, Input, Button, Upload, DatePicker, Rate, message, Switch, Select, Tag } from 'antd'
 import type { GetProp, UploadFile, UploadProps } from 'antd'
 import { Container } from '@web/components/Container'
 import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
+import { Skeleton } from 'antd'
 
 import { PlusOutlined } from '@ant-design/icons'
 
@@ -25,9 +26,28 @@ export default function UploadPage() {
   const [previewImage, setPreviewImage] = useState('')
   const [aiDescription, setAiDescription] = useState('')
   const [aiTags, setAiTags] = useState<string[]>([])
+  const [aiTagsDisplay, setAiTagsDisplay] = useState<string[]>([])
   const [aiLocation, setAiLocation] = useState('')
   const [aiTimeOfDay, setAiTimeOfDay] = useState('')
   const [aiSuggestedName, setAiSuggestedName] = useState('')
+
+  const handleTagClick = useCallback(
+    tag => {
+      const tags = form.getFieldValue('tags') || []
+      const newTags = [...tags, tag]
+      form.setFieldsValue({ tags: newTags })
+      setAiTagsDisplay(prev => prev.filter(t => t !== tag))
+    },
+    [setAiTagsDisplay, form]
+  )
+
+  useEffect(() => {
+    if (aiTags.length > 0) {
+      const tags = form.getFieldValue('tags') || []
+      const newTags = aiTags.filter(tag => !tags.includes(tag))
+      setAiTagsDisplay([...newTags])
+    }
+  }, [aiTags])
 
   useEffect(() => {
     let isSubscribed = false
@@ -42,6 +62,7 @@ export default function UploadPage() {
       // clear previous data
       setAiDescription('')
       setAiTags([])
+      setAiTagsDisplay([])
       setAiLocation('')
       setAiTimeOfDay('')
       setAiSuggestedName('')
@@ -81,15 +102,15 @@ export default function UploadPage() {
             const parsedJson = JSON.parse(json)
             if (isSubscribed) {
               setAiDescription(parsedJson.d)
-              setAiTags(parsedJson.a)
+              // Needed to catch edges cases where the user change the image while having taqs populated
+              const tags = form.getFieldValue('tags') || []
+              const newTags = [...tags, ...parsedJson.a]
+              setAiTags(newTags)
               setAiLocation(parsedJson.l)
               setAiTimeOfDay(parsedJson.t)
               setAiSuggestedName(parsedJson.n)
             }
-            console.log('parsedJson', parsedJson)
             continue
-          } else {
-            console.log(line)
           }
         }
       }
@@ -110,12 +131,10 @@ export default function UploadPage() {
     }
 
     reader.readAsDataURL(file)
-
     return true
   }
 
   const handleChange = info => {
-    console.log('info', info)
     if (info.file.status === 'uploading') {
       setUploadId('')
       setUploading(true)
@@ -162,6 +181,7 @@ export default function UploadPage() {
           layout="vertical"
           initialValues={{ isBookmarked: false }}
           onFinish={handleUpload}
+          className="flex flex-col gap-4"
         >
           <Form.Item
             label={null}
@@ -187,59 +207,58 @@ export default function UploadPage() {
               {previewImage && <Button>Change Image</Button>}
             </Upload>
           </Form.Item>
-          <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+
+          <Form.Item label="Name" name="name" rules={[{ required: true }]} className="my-0 p-0">
             <Input />
           </Form.Item>
-          {aiSuggestedName && (
-            <div className="my-8">
-              <h2 className="text-lg font-semibold">AI Suggested Name:</h2>
-              <p>{aiSuggestedName}</p>
-            </div>
-          )}
+
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={3} />
           </Form.Item>
+          {uploadId && !aiDescription && <Skeleton active />}
           {aiDescription && (
-            <div className="my-8">
+            <div className="mb-6">
               <h2 className="text-lg font-semibold">AI Description:</h2>
               <p>{aiDescription}</p>
             </div>
           )}
           <Form.Item label="Tags" name="tags">
-            <Select mode="tags" style={{ width: '100%' }} placeholder="Tags" />
+            <Select
+              mode="tags"
+              style={{ width: '100%' }}
+              placeholder="Tags"
+              onChange={() => {
+                const tags = form.getFieldValue('tags') || []
+                setAiTagsDisplay(() => {
+                  return aiTags.filter(tag => !tags.includes(tag))
+                })
+              }}
+            />
           </Form.Item>
-          {aiTags.length > 0 && (
-            <>
-              <h2>AI Suggested Tags:</h2>
-              {aiTags.map((tag, index) => (
+          {uploadId && !aiTags?.length && <Skeleton.Input active block />}
+          {aiTagsDisplay.length > 0 && (
+            <div className="flex gap-2 flex-wrap w-full mb-8 items-center">
+              <span className="font-bold">AI Suggested Tags:</span>
+              {aiTagsDisplay.map((tag, index) => (
                 <Tag
                   key={index}
                   closeIcon={<PlusOutlined />}
                   onClose={e => {
                     e.preventDefault()
+                    e.stopPropagation()
+                    handleTagClick(tag)
                   }}
                   className="cursor-pointer"
-                  onClick={() => {
-                    const tags = form.getFieldValue('tags') || []
-                    const newTags = [...tags, tag]
-                    form.setFieldsValue({ tags: newTags })
-                    setAiTags(prev => prev.filter(t => t !== tag))
-                  }}
+                  onClick={() => handleTagClick(tag)}
                 >
                   {tag}
                 </Tag>
               ))}
-            </>
+            </div>
           )}
           <div className="flex w-full gap-4 justify-between">
             <Form.Item label="Bookmark" valuePropName="checked" name="isBookmarked">
               <Switch />
-            </Form.Item>
-            <Form.Item label="Date" name="date">
-              <DatePicker />
-            </Form.Item>
-            <Form.Item label="Rating" name="rating">
-              <Rate />
             </Form.Item>
           </div>
           <Form.Item label={null}>

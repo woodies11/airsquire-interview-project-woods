@@ -98,11 +98,9 @@ router.post('/', async (req: any, res: any) => {
     thumbnailUrl: thumbnailPath,
     name: '',
     description: '',
-    rating: null,
     lastModified: new Date(),
     uploadedAt: new Date(),
     uploadedBy: 'user',
-    date: null,
     md5,
     // keep track of orphaned images so we can delete them periodically if the user never fisishes the upload
     upload_status: 'temp',
@@ -130,8 +128,6 @@ router.patch('/', async (req: any, res: any) => {
   const imageMeta = {
     name,
     description,
-    rating,
-    date,
     upload_status: 'completed',
     lastModified: new Date(),
   }
