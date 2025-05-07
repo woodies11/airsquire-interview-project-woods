@@ -8,6 +8,8 @@ import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 import { Skeleton } from 'antd'
 
 import { PlusOutlined } from '@ant-design/icons'
+import imageCompression from 'browser-image-compression'
+import { RcFile } from 'antd/es/upload'
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:4000'
 
@@ -123,7 +125,40 @@ export default function UploadPage() {
     }
   }, [uploadId])
 
+  const toSHA256 = async (file: File): Promise<string> => {
+    const buffer = await file.arrayBuffer()
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    return hashHex
+  }
+
+  const uploadSmallerSize = async (file: File, sha256: string) => {
+    const options = {
+      maxHeight: 1920,
+      useWebWorker: true,
+      maxSizeMB: 5,
+    }
+
+    const compressedFile = await imageCompression(file, options)
+
+    const formData = new FormData()
+    formData.append('file', compressedFile, file.name)
+    formData.append('sha256', sha256)
+
+    const res = await fetch(`${BASE_API_URL}/api/images`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    const data = await res.json()
+    if (data.success) {
+      setUploadId(data.id)
+    }
+  }
+
   const beforeUpload = async (file: File) => {
+    setUploadId('')
     const reader = new FileReader()
 
     reader.onload = () => {
@@ -136,7 +171,6 @@ export default function UploadPage() {
 
   const handleChange = info => {
     if (info.file.status === 'uploading') {
-      setUploadId('')
       setUploading(true)
     } else {
       setUploading(false)
@@ -147,7 +181,29 @@ export default function UploadPage() {
     }
   }
 
-  const handleUpload = async (data: any) => {
+  const customRequest: UploadProps['customRequest'] = async ({ file, onSuccess }) => {
+    const f = file as File // Technically RcFile but File is a subset of RcFile
+    const sha256 = await toSHA256(f)
+
+    // Upload a smaller version first to kick start enrichment process and get database entry
+    await uploadSmallerSize(f, sha256)
+
+    // Most panoramic images are large, so this will take a long while
+    const formData = new FormData()
+    formData.append('file', f, f.name)
+    formData.append('sha256', sha256)
+    const res = await fetch(`${BASE_API_URL}/api/images/originals`, {
+      method: 'POST',
+      body: formData,
+    })
+    const data = await res.json()
+    if (data.success) {
+      setUploadId(data.id)
+    }
+    onSuccess(data, file)
+  }
+
+  const handleSubmit = async (data: any) => {
     if (!uploadId) {
       message.info('Uploading...')
       return
@@ -180,7 +236,7 @@ export default function UploadPage() {
           form={form}
           layout="vertical"
           initialValues={{ isBookmarked: false }}
-          onFinish={handleUpload}
+          onFinish={handleSubmit}
           className="flex flex-col gap-4"
         >
           <Form.Item
@@ -191,12 +247,13 @@ export default function UploadPage() {
             rules={[{ required: true, message: 'Please upload a panoramic image' }]}
           >
             <Upload
-              action={`http://localhost:4000/api/images`}
+              action={`http://localhost:4000/api/images/original`}
               accept="image/*"
               maxCount={1}
               showUploadList={false}
               onChange={handleChange}
               beforeUpload={beforeUpload}
+              customRequest={customRequest}
               className="w-full flex flex-col items-center justify-center"
             >
               {!previewImage && (
