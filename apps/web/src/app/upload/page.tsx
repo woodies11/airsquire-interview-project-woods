@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Form, Input, Button, Upload, DatePicker, Rate, message, Switch } from 'antd'
+import { Form, Input, Button, Upload, DatePicker, Rate, message, Switch, Select, Tag } from 'antd'
 import type { GetProp, UploadFile, UploadProps } from 'antd'
 import { Container } from '@web/components/Container'
 import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
+
+import { PlusOutlined } from '@ant-design/icons'
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:4000'
 
@@ -25,6 +27,7 @@ export default function UploadPage() {
   const [aiTags, setAiTags] = useState<string[]>([])
   const [aiLocation, setAiLocation] = useState('')
   const [aiTimeOfDay, setAiTimeOfDay] = useState('')
+  const [aiSuggestedName, setAiSuggestedName] = useState('')
 
   useEffect(() => {
     let isSubscribed = false
@@ -35,6 +38,15 @@ export default function UploadPage() {
 
     const enrichData = async () => {
       isSubscribed = true
+
+      // clear previous data
+      setAiDescription('')
+      setAiTags([])
+      setAiLocation('')
+      setAiTimeOfDay('')
+      setAiSuggestedName('')
+      setAiDescription('')
+
       const res = await fetch(`${BASE_API_URL}/api/enrichment`, {
         method: 'POST',
         body: JSON.stringify({
@@ -72,6 +84,7 @@ export default function UploadPage() {
               setAiTags(parsedJson.a)
               setAiLocation(parsedJson.l)
               setAiTimeOfDay(parsedJson.t)
+              setAiSuggestedName(parsedJson.n)
             }
             console.log('parsedJson', parsedJson)
             continue
@@ -137,7 +150,7 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
+    <div className="w-full min-h-[calc(100vh+20rem)] flex flex-col items-center">
       {previewImage && (
         <Container className="mt-8">
           <PanoramicViewer imgSrc={previewImage} />
@@ -177,6 +190,12 @@ export default function UploadPage() {
           <Form.Item label="Name" name="name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
+          {aiSuggestedName && (
+            <div className="my-8">
+              <h2 className="text-lg font-semibold">AI Suggested Name:</h2>
+              <p>{aiSuggestedName}</p>
+            </div>
+          )}
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={3} />
           </Form.Item>
@@ -185,6 +204,32 @@ export default function UploadPage() {
               <h2 className="text-lg font-semibold">AI Description:</h2>
               <p>{aiDescription}</p>
             </div>
+          )}
+          <Form.Item label="Tags" name="tags">
+            <Select mode="tags" style={{ width: '100%' }} placeholder="Tags" />
+          </Form.Item>
+          {aiTags.length > 0 && (
+            <>
+              <h2>AI Suggested Tags:</h2>
+              {aiTags.map((tag, index) => (
+                <Tag
+                  key={index}
+                  closeIcon={<PlusOutlined />}
+                  onClose={e => {
+                    e.preventDefault()
+                  }}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    const tags = form.getFieldValue('tags') || []
+                    const newTags = [...tags, tag]
+                    form.setFieldsValue({ tags: newTags })
+                    setAiTags(prev => prev.filter(t => t !== tag))
+                  }}
+                >
+                  {tag}
+                </Tag>
+              ))}
+            </>
           )}
           <div className="flex w-full gap-4 justify-between">
             <Form.Item label="Bookmark" valuePropName="checked" name="isBookmarked">

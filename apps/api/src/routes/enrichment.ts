@@ -16,6 +16,7 @@ const IMAGE_ENRICHMENT_PROMPT_STEP_1 = `
 You are an AI assistant that helps users enrich their images with metadata. You will be given an image in base64 format and your task is to:
 1. Describe the image in detail, including objects, people, and actions.
 2. Do not make up any information in desription. If you cannot identify something simply say so.
+Only return plain text, no markdown or other formatting.
 `
 
 const IMAGE_ENRICHMENT_PROMPT_STEP_2 = `
