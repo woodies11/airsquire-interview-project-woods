@@ -20,12 +20,14 @@ You are an AI assistant that helps users enrich their images with metadata. You 
 
 const IMAGE_ENRICHMENT_PROMPT_STEP_2 = `
 Now, based on the description you provided, identify and generate:
-1. The location of the image (e.g., city, country, or specific place) or "unknown" if you cannot identify it.
-2. The time of day the image was taken (daytime, night-time, or unknown).
-3. A list of tags for the image for metadata enrichment and searchability purposes.
+1. Suggested name for the image.
+2. The location of the image (e.g., city, country, or specific place) or "unknown" if you cannot identify it.
+3. The time of day the image was taken (daytime, night-time, or unknown).
+4. A list of tags for the image for metadata enrichment and searchability purposes.
 
 Return the location, time of day, and tags in a JSON format as follows:
 {
+  "n": "<name>",
   "l": "<location>",
   "t": "<time_of_day>",
   "a": ["<tag1>", "<tag2>", ...]
@@ -141,6 +143,7 @@ router.post('/', async (req: any, res: any) => {
 
 const EnrichmentResponse = zodResponseFormat(
   z.object({
+    n: z.string(),
     l: z.string().nullable(),
     t: z.enum(['daytime', 'night-time', 'unknown']),
     a: z.array(z.string()),
