@@ -2,9 +2,14 @@ import express from 'express'
 import fileUpload from 'express-fileupload'
 import fs from 'fs'
 import { ObjectId } from 'mongodb'
+import OpenAI from 'openai'
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 import { dbImagesCollection } from '../db.js'
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 const router = express.Router()
 
@@ -93,7 +98,7 @@ router.post('/', async (req: any, res: any) => {
     thumbnailUrl: thumbnailPath,
     name: '',
     description: '',
-    rating: -1,
+    rating: null,
     lastModified: new Date(),
     uploadedAt: new Date(),
     uploadedBy: 'user',

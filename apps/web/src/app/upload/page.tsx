@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Form, Input, Button, Upload, DatePicker, Rate, message, Switch } from 'antd'
 import type { GetProp, UploadFile, UploadProps } from 'antd'
 import { Container } from '@web/components/Container'
 import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000'
+const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:4000'
 
 const fileEventHandler = (e: any) => {
   if (Array.isArray(e)) {
@@ -21,6 +21,73 @@ export default function UploadPage() {
   const [uploadId, setUploadId] = useState('')
 
   const [previewImage, setPreviewImage] = useState('')
+  const [aiDescription, setAiDescription] = useState('')
+  const [aiTags, setAiTags] = useState<string[]>([])
+  const [aiLocation, setAiLocation] = useState('')
+  const [aiTimeOfDay, setAiTimeOfDay] = useState('')
+
+  useEffect(() => {
+    let isSubscribed = false
+    if (!uploadId)
+      return () => {
+        isSubscribed = false
+      }
+
+    const enrichData = async () => {
+      isSubscribed = true
+      const res = await fetch(`${BASE_API_URL}/api/enrichment`, {
+        method: 'POST',
+        body: JSON.stringify({
+          imageId: uploadId,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (!isSubscribed) break
+
+        const lines = decoder.decode(value).split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('%%DESC%%:')) {
+            const desc = line.replace('%%DESC%%:', '')
+            if (isSubscribed) {
+              setAiDescription(prev => {
+                return (prev += desc)
+              })
+            }
+            continue
+          } else if (line.startsWith('%%JSON%%:')) {
+            const json = line.replace('%%JSON%%:', '').trim()
+            const parsedJson = JSON.parse(json)
+            if (isSubscribed) {
+              setAiDescription(parsedJson.d)
+              setAiTags(parsedJson.a)
+              setAiLocation(parsedJson.l)
+              setAiTimeOfDay(parsedJson.t)
+            }
+            console.log('parsedJson', parsedJson)
+            continue
+          } else {
+            console.log(line)
+          }
+        }
+      }
+    }
+
+    enrichData()
+
+    return () => {
+      isSubscribed = false
+    }
+  }, [uploadId])
 
   const beforeUpload = async (file: File) => {
     const reader = new FileReader()
@@ -36,8 +103,13 @@ export default function UploadPage() {
 
   const handleChange = info => {
     console.log('info', info)
+    if (info.file.status === 'uploading') {
+      setUploadId('')
+      setUploading(true)
+    } else {
+      setUploading(false)
+    }
     if (info.file.status === 'done') {
-      console.log('info.file.response', info.file.response)
       const { id } = info.file.response
       setUploadId(id)
     }
@@ -50,7 +122,7 @@ export default function UploadPage() {
     }
     const { files, ...formData } = data
 
-    const result = await fetch(`${BASE_URL}/api/images`, {
+    const result = await fetch(`${BASE_API_URL}/api/images`, {
       method: 'PATCH',
       body: JSON.stringify({
         id: uploadId,
@@ -65,13 +137,13 @@ export default function UploadPage() {
   }
 
   return (
-    <>
+    <div className="w-full min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
       {previewImage && (
         <Container className="mt-8">
           <PanoramicViewer imgSrc={previewImage} />
         </Container>
       )}
-      <div className="w-full p-4 max-w-2xl mx-auto">
+      <div className="w-full p-4 max-w-2xl mx-auto mt-2">
         <Form
           form={form}
           layout="vertical"
@@ -108,6 +180,12 @@ export default function UploadPage() {
           <Form.Item label="Description" name="description">
             <Input.TextArea rows={3} />
           </Form.Item>
+          {aiDescription && (
+            <div className="my-8">
+              <h2 className="text-lg font-semibold">AI Description:</h2>
+              <p>{aiDescription}</p>
+            </div>
+          )}
           <div className="flex w-full gap-4 justify-between">
             <Form.Item label="Bookmark" valuePropName="checked" name="isBookmarked">
               <Switch />
@@ -120,12 +198,12 @@ export default function UploadPage() {
             </Form.Item>
           </div>
           <Form.Item label={null}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
               Upload
             </Button>
           </Form.Item>
         </Form>
       </div>
-    </>
+    </div>
   )
 }

@@ -37,13 +37,16 @@ importers:
         version: 1.4.5-lts.2
       openai:
         specifier: ^4.97.0
-        version: 4.97.0
+        version: 4.97.0(zod@3.24.4)
       sharp:
         specifier: ^0.34.1
         version: 0.34.1
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
+      zod:
+        specifier: ^3.24.4
+        version: 3.24.4
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -1801,6 +1804,9 @@ packages:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
     engines: {node: '>=6'}
 
+  zod@3.24.4:
+    resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
+
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -2861,7 +2867,7 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  openai@4.97.0:
+  openai@4.97.0(zod@3.24.4):
     dependencies:
       '@types/node': 18.19.96
       '@types/node-fetch': 2.6.12
@@ -2870,6 +2876,8 @@ snapshots:
       form-data-encoder: 1.7.2
       formdata-node: 4.4.1
       node-fetch: 2.7.0
+    optionalDependencies:
+      zod: 3.24.4
     transitivePeerDependencies:
       - encoding
 
@@ -3491,3 +3499,5 @@ snapshots:
   xtend@4.0.2: {}
 
   yn@3.1.1: {}
+
+  zod@3.24.4: {}
