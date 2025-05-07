@@ -51,7 +51,7 @@ router.post('/', async (req: any, res: any) => {
       console.log('File already exists in database:', existingImage._id)
       try {
         // check that the file physically exists on disk as well in case of DB drift
-        const filePath = `uploads/${existingImage.imageUrl}`
+        const filePath = existingImage.imageUrl
         fs.accessSync(filePath, fs.constants.F_OK)
         res.json({ success: true, id: existingImage._id.toString() })
         return
