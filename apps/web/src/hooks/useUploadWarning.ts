@@ -1,8 +1,10 @@
+'use client'
+
+import { useUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
 import { useEffect } from 'react'
 
 export const useUploadWarning = () => {
-  // TODO: Replace with actual value from context store
-  const pendingUploads = 1
+  const { pendingUploads } = useUpload()
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {

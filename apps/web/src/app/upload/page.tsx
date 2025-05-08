@@ -9,7 +9,8 @@ import { Skeleton } from 'antd'
 
 import { PlusOutlined } from '@ant-design/icons'
 import imageCompression from 'browser-image-compression'
-import { RcFile } from 'antd/es/upload'
+import { useUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
+import { useRouter } from 'next/navigation'
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:4000'
 
@@ -22,16 +23,18 @@ const fileEventHandler = (e: any) => {
 
 export default function UploadPage() {
   const [form] = Form.useForm()
-  const [uploading, setUploading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [uploadId, setUploadId] = useState('')
+  const [hasSelectedImage, setHasSelectedImage] = useState(false)
 
   const [previewImage, setPreviewImage] = useState('')
   const [aiDescription, setAiDescription] = useState('')
   const [aiTags, setAiTags] = useState<string[]>([])
   const [aiTagsDisplay, setAiTagsDisplay] = useState<string[]>([])
-  const [aiLocation, setAiLocation] = useState('')
-  const [aiTimeOfDay, setAiTimeOfDay] = useState('')
-  const [aiSuggestedName, setAiSuggestedName] = useState('')
+
+  const { startBackgroundUpload, pendingUploads } = useUpload()
+
+  const router = useRouter()
 
   const handleTagClick = useCallback(
     tag => {
@@ -65,9 +68,6 @@ export default function UploadPage() {
       setAiDescription('')
       setAiTags([])
       setAiTagsDisplay([])
-      setAiLocation('')
-      setAiTimeOfDay('')
-      setAiSuggestedName('')
       setAiDescription('')
 
       const res = await fetch(`${BASE_API_URL}/api/enrichment`, {
@@ -108,9 +108,6 @@ export default function UploadPage() {
               const tags = form.getFieldValue('tags') || []
               const newTags = [...tags, ...parsedJson.a]
               setAiTags(newTags)
-              setAiLocation(parsedJson.l)
-              setAiTimeOfDay(parsedJson.t)
-              setAiSuggestedName(parsedJson.n)
             }
             continue
           }
@@ -146,35 +143,20 @@ export default function UploadPage() {
     formData.append('file', compressedFile, file.name)
     formData.append('sha256', sha256)
 
-    const res = await fetch(`${BASE_API_URL}/api/images`, {
+    return fetch(`${BASE_API_URL}/api/images`, {
       method: 'POST',
       body: formData,
     })
-
-    const data = await res.json()
-    if (data.success) {
-      setUploadId(data.id)
-    }
   }
 
   const beforeUpload = async (file: File) => {
     setUploadId('')
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      setPreviewImage(reader.result as string)
-    }
-
-    reader.readAsDataURL(file)
+    setIsUploading(true)
+    setHasSelectedImage(true)
     return true
   }
 
   const handleChange = info => {
-    if (info.file.status === 'uploading') {
-      setUploading(true)
-    } else {
-      setUploading(false)
-    }
     if (info.file.status === 'done') {
       const { id } = info.file.response
       setUploadId(id)
@@ -186,21 +168,29 @@ export default function UploadPage() {
     const sha256 = await toSHA256(f)
 
     // Upload a smaller version first to kick start enrichment process and get database entry
-    await uploadSmallerSize(f, sha256)
-
-    // Most panoramic images are large, so this will take a long while
-    const formData = new FormData()
-    formData.append('file', f, f.name)
-    formData.append('sha256', sha256)
-    const res = await fetch(`${BASE_API_URL}/api/images/originals`, {
-      method: 'POST',
-      body: formData,
-    })
+    const res = await uploadSmallerSize(f, sha256)
     const data = await res.json()
     if (data.success) {
       setUploadId(data.id)
     }
+
+    // The above request require image compression, so we should delay the loading three.js viewer
+    const reader = new FileReader()
+    reader.onload = () => {
+      setPreviewImage(reader.result as string)
+    }
+    reader.readAsDataURL(f)
+
     onSuccess(data, file)
+
+    // Once that is done, allow user to submit the form while orginal image is uploading in the background
+    setIsUploading(false)
+
+    // Most panoramic images are large, so this will take a long while
+    startBackgroundUpload(f, {
+      sha256,
+      id: data.id,
+    })
   }
 
   const handleSubmit = async (data: any) => {
@@ -210,7 +200,7 @@ export default function UploadPage() {
     }
     const { files, ...formData } = data
 
-    const result = await fetch(`${BASE_API_URL}/api/images`, {
+    const res = await fetch(`${BASE_API_URL}/api/images`, {
       method: 'PATCH',
       body: JSON.stringify({
         id: uploadId,
@@ -220,13 +210,23 @@ export default function UploadPage() {
         'Content-Type': 'application/json',
       },
     })
-    const res = await result.json()
-    console.log('res', res)
+    const payload = await res.json()
+    if (payload.success) {
+      if (pendingUploads > 0) {
+        message.success(
+          'Successfully added new image, full resolution image will continue uploading in the background.'
+        )
+      }
+      // Don't want the back button to take the user back to the upload page
+      router.replace(`/`)
+    } else {
+      message.error('Error uploading image')
+    }
   }
 
   return (
     <div className="w-full min-h-[calc(100vh+20rem)] flex flex-col items-center">
-      {previewImage && (
+      {hasSelectedImage && (
         <Container className="mt-8">
           <PanoramicViewer imgSrc={previewImage} />
         </Container>
@@ -256,12 +256,12 @@ export default function UploadPage() {
               customRequest={customRequest}
               className="w-full flex flex-col items-center justify-center"
             >
-              {!previewImage && (
+              {!hasSelectedImage && (
                 <div className="bg-gray-100 cursor-pointer flex flex-col items-center justify-center max-w-screen w-xl h-64 border border-dashed rounded-lg p-4 mb-8 border-gray-500">
                   <p>Click or drag file to this area to upload</p>
                 </div>
               )}
-              {previewImage && <Button>Change Image</Button>}
+              {hasSelectedImage && <Button>Change Image</Button>}
             </Upload>
           </Form.Item>
 
@@ -319,7 +319,7 @@ export default function UploadPage() {
             </Form.Item>
           </div>
           <Form.Item label={null}>
-            <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
+            <Button type="primary" htmlType="submit" loading={isUploading} disabled={isUploading}>
               Upload
             </Button>
           </Form.Item>
