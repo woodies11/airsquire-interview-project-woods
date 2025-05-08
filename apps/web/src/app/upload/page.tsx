@@ -11,8 +11,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import imageCompression from 'browser-image-compression'
 import { useUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
 import { useRouter } from 'next/navigation'
-
-const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:4000'
+import { BASE_API_URL } from 'apps/web/configs'
 
 const fileEventHandler = (e: any) => {
   if (Array.isArray(e)) {
@@ -261,7 +260,7 @@ export default function UploadPage() {
                   <p>Click or drag file to this area to upload</p>
                 </div>
               )}
-              {hasSelectedImage && <Button>Change Image</Button>}
+              {hasSelectedImage && <Button disabled={isUploading}>Change Image</Button>}
             </Upload>
           </Form.Item>
 

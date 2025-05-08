@@ -11,7 +11,7 @@ const app = express()
 const PORT = 4000
 
 app.use(cors())
-app.use('/images', express.static(path.resolve('uploads')))
+app.use('/uploads', express.static(path.resolve('uploads')))
 app.use(express.json())
 
 // log requests to the console

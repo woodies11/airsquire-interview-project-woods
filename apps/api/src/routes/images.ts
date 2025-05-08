@@ -1,3 +1,4 @@
+import { ImageEntryDB } from '@airsquire/common/src/models/types.server.js'
 import express from 'express'
 import fileUpload from 'express-fileupload'
 import { ObjectId } from 'mongodb'
@@ -112,13 +113,14 @@ router.post('/', async (req: any, res: any) => {
   console.log('File uploaded to:', uploadPath)
 
   // insert into db with placeholder values
-  const imageMeta = {
+  const imageMeta: ImageEntryDB = {
     imageUrl: uploadPath,
     thumbnailUrl: thumbnailPath,
     name: '',
     description: '',
     lastModified: new Date(),
     uploadedAt: new Date(),
+    tags: [],
     uploadedBy: 'user',
     sha256,
     // keep track of orphaned images so we can delete them periodically if the user never fisishes the upload
@@ -141,13 +143,14 @@ router.post('/', async (req: any, res: any) => {
  */
 router.patch('/', async (req: any, res: any) => {
   console.log('req', req.body)
-  const { id, name, description, rating, date } = req.body
+  const { id, name, description, tags } = req.body
   if (!id) {
     return res.status(400).json({ error: 'No id provided' })
   }
-  const imageMeta = {
+  const imageMeta: Partial<ImageEntryDB> = {
     name,
     description,
+    tags,
     entry_status: 'completed',
     lastModified: new Date(),
   }
@@ -160,7 +163,10 @@ router.patch('/', async (req: any, res: any) => {
 })
 
 router.get('/', async (_, res) => {
-  const data = await dbImagesCollection.find().sort({ uploadedAt: -1 }).toArray()
+  const data = await dbImagesCollection
+    .find({ entry_status: 'completed' })
+    .sort({ uploadedAt: -1 })
+    .toArray()
   res.json(data)
 })
 

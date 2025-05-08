@@ -1,8 +1,7 @@
 'use client'
 import { message } from 'antd'
+import { BASE_API_URL } from 'apps/web/configs'
 import { createContext, useContext, useState } from 'react'
-
-const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:4000'
 
 export const BackgroundUploadContext = createContext<{
   pendingUploads: number
