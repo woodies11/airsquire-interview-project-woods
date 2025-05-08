@@ -172,4 +172,16 @@ router.get('/', async (_, res) => {
   res.json(data)
 })
 
+router.get('/:id', async (req: any, res: any) => {
+  const { id } = req.params
+  if (!id) {
+    return res.status(400).json({ error: 'No id provided' })
+  }
+  const image = await dbImagesCollection.findOne({ _id: new ObjectId(id) })
+  if (!image) {
+    return res.status(404).json({ error: 'Image not found' })
+  }
+  res.json(image)
+})
+
 export default router

@@ -10,7 +10,7 @@ export default function BookmarkIcon({ isBookmarked }: { isBookmarked: boolean }
       fill={isBookmarked ? 'currentColor' : 'none'}
       strokeWidth={2}
       stroke="currentColor"
-      className={`w-6 h-6 ${isBookmarked ? 'text-yellow-500' : 'text-gray-500'} cursor-pointer`}
+      className={`w-6 h-6 ${isBookmarked ? 'text-asq-primary' : 'text-gray-500'} cursor-pointer`}
     >
       <path
         strokeLinecap="round"

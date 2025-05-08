@@ -18,7 +18,9 @@ export default function BookmarkToggleButton({
 }) {
   const [_isBookmarked, setIsBookmarked] = useState(isBookmarked)
   const router = useRouter()
-  const handleClick = async () => {
+  const handleClick = async e => {
+    e.preventDefault()
+    e.stopPropagation()
     try {
       // Optimistically update the UI before the server responds - improves UX
       setIsBookmarked(prev => !prev)

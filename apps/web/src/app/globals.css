@@ -1,1 +1,11 @@
 @import 'tailwindcss';
+
+@theme {
+  --color-asq-background-light: #fffdf7;
+  --color-asq-background-dark: #041410;
+  --color-asq-foreground-light: #062606;
+  --color-asq-foreground-dark: #fffdf7;
+  --color-asq-primary: #004b2d;
+  --color-asq-accent: #a9ea74;
+  --color-asq-accent-secondary: #e6ffd1;
+}
