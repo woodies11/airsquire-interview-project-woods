@@ -4,6 +4,7 @@ import { BASE_API_URL } from 'apps/web/configs'
 import { ImageEntryDTO, ImageEntry, parseImageEntries } from '@airsquire/common/src/models'
 import BookmarkToggleButton from '@web/components/clients/BookmarkToggleButton'
 import Link from 'next/link'
+import ClientSearchBox from './components/ClientSearchBox'
 
 export default async function Page({
   searchParams,
@@ -36,6 +37,7 @@ export default async function Page({
     <Container>
       <div className="flex flex-col items-center justify-center w-full h-full py-8 text-asq-foreground-light">
         <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
+        <ClientSearchBox />
         {images?.length > 0 &&
           images.map(image => (
             <Link
