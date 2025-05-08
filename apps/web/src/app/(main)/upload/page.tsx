@@ -8,7 +8,7 @@ import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 import { Skeleton } from 'antd'
 
 import imageCompression from 'browser-image-compression'
-import { useUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
+import { useBackgroundUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
 import { useRouter } from 'next/navigation'
 import { BASE_API_URL } from 'apps/web/configs'
 
@@ -30,7 +30,7 @@ export default function UploadPage() {
   const [aiTags, setAiTags] = useState<string[]>([])
   const [aiTagsDisplay, setAiTagsDisplay] = useState<string[]>([])
 
-  const { startBackgroundUpload, pendingUploads } = useUpload()
+  const { startBackgroundUpload, pendingUploads } = useBackgroundUpload()
 
   const router = useRouter()
 
@@ -133,7 +133,9 @@ export default function UploadPage() {
     return hashHex
   }
 
-  const uploadSmallerSize = async (file: File, sha256: string) => {
+  const sendInitialUploadRequest = async (file: File, sha256: string) => {
+    // Send a smaller version of the image to the server first to kickstart the enrichment process
+    // and create a placeholder entry in the database
     const options = {
       maxHeight: 1920,
       useWebWorker: true,
@@ -141,6 +143,14 @@ export default function UploadPage() {
     }
 
     const compressedFile = await imageCompression(file, options)
+
+    // Compressing image is computationally expensive, so we want to defer
+    // three.js loading until after the worker finishes compressing the file
+    const reader = new FileReader()
+    reader.onload = () => {
+      setPreviewImage(reader.result as string)
+    }
+    reader.readAsDataURL(file)
 
     const formData = new FormData()
     formData.append('file', compressedFile, file.name)
@@ -171,18 +181,11 @@ export default function UploadPage() {
     const sha256 = await toSHA256(f)
 
     // Upload a smaller version first to kick start enrichment process and get database entry
-    const res = await uploadSmallerSize(f, sha256)
+    const res = await sendInitialUploadRequest(f, sha256)
     const data = await res.json()
     if (data.success) {
       setUploadId(data.id)
     }
-
-    // The above request require image compression, so we should delay the loading three.js viewer
-    const reader = new FileReader()
-    reader.onload = () => {
-      setPreviewImage(reader.result as string)
-    }
-    reader.readAsDataURL(f)
 
     onSuccess(data, file)
 

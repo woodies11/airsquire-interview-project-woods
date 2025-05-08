@@ -9,3 +9,11 @@
   --color-asq-accent: #a9ea74;
   --color-asq-accent-secondary: #e6ffd1;
 }
+
+.tooltip {
+  @apply invisible;
+}
+
+.tooltip-target:hover .tooltip {
+  @apply visible z-60;
+}

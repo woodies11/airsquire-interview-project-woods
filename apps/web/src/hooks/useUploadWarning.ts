@@ -1,10 +1,10 @@
 'use client'
 
-import { useUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
+import { useBackgroundUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
 import { useEffect } from 'react'
 
 export const useUploadWarning = () => {
-  const { pendingUploads } = useUpload()
+  const { pendingUploads } = useBackgroundUpload()
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {

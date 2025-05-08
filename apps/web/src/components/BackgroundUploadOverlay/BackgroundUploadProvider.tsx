@@ -35,10 +35,6 @@ export const BackgroundUploadProvider = ({ children }: { children: React.ReactNo
       console.error('Upload failed:', err)
     } finally {
       setPendingUploads(p => {
-        if (p === 1) {
-          // TODO: Should debounce this
-          message.success('All Uploads Completed!')
-        }
         return p - 1
       })
     }
@@ -51,4 +47,4 @@ export const BackgroundUploadProvider = ({ children }: { children: React.ReactNo
   )
 }
 
-export const useUpload = () => useContext(BackgroundUploadContext)
+export const useBackgroundUpload = () => useContext(BackgroundUploadContext)
