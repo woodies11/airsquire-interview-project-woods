@@ -1,8 +1,8 @@
 import 'server-only'
-import { Container } from '@web/components/Container'
+import { Container } from '@web/components/ui/Container'
 import { BASE_API_URL } from 'apps/web/configs'
-import { ImageEntryBase } from '@airsquire/common/src/models/types.js'
-import { ImageEntry, parseImageEntries } from '@airsquire/common/src/models/types.client.js'
+import { ImageEntryDTO, ImageEntry, parseImageEntries } from '@airsquire/common/src/models'
+import BookmarkToggleButton from '@web/components/clients/BookmarkToggleButton'
 
 export default async function Page() {
   const res = await fetch(`${BASE_API_URL}/api/images/`, {
@@ -11,19 +11,24 @@ export default async function Page() {
   if (!res.ok) {
     throw new Error('Failed to fetch data')
   }
-  const data: ImageEntryBase[] = await res.json()
+  const data: ImageEntryDTO[] = await res.json()
   const images: ImageEntry[] = parseImageEntries(data)
 
   return (
     <Container>
-      <div className="flex flex-col items-center justify-center w-full h-full py-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex flex-col items-center justify-center w-full h-full py-8 bg-primary">
+        <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
         {images?.length > 0 &&
           images.map(image => (
             <div
               key={image._id}
-              className="grid grid-cols-1 justify-items-center md:justify-items-start md:grid-cols-[12rem_1fr] gap-4 md:gap-8 items-center justify-center w-full p-4 border-b"
+              className={
+                `grid grid-cols-1 md:grid-cols-[2rem_12rem_1fr] justify-items-center md:justify-items-start` +
+                ` gap-4 md:gap-8 items-center justify-center w-full p-4 even:bg-gray-100 odd:bg-white` +
+                ` hover:bg-gray-200 duration-500 hover:shadow-md cursor-pointer`
+              }
             >
+              <BookmarkToggleButton imageId={image._id} isBookmarked={!!image.isBookmarked} />
               <img
                 src={`${BASE_API_URL}/${image.thumbnailUrl}`}
                 alt={image.name}

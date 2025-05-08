@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Container } from '../../../components/Container'
+import { Container } from '../../../components/ui/Container'
 import PanoramicViewer from '../../../components/ui/PanoramicViewer/PanoramicViewer'
 import { useState } from 'react'
 

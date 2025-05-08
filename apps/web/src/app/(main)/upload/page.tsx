@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Form, Input, Button, Upload, DatePicker, Rate, message, Switch, Select, Tag } from 'antd'
 import type { GetProp, UploadFile, UploadProps } from 'antd'
-import { Container } from '@web/components/Container'
+import { Container } from '@web/components/ui/Container'
 import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 import { Skeleton } from 'antd'
 

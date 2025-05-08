@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { NavHeader } from '../../components/ui/NavHeader/NavHeader'
-import ClientOverlay from './components/ClientOverlay'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +10,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </span>
       </NavHeader>
       <main>{children}</main>
-      <ClientOverlay />
     </>
   )
 }

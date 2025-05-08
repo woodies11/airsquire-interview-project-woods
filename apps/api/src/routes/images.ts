@@ -123,6 +123,7 @@ router.post('/', async (req: any, res: any) => {
     tags: [],
     uploadedBy: 'user',
     sha256,
+    isBookmarked: false,
     // keep track of orphaned images so we can delete them periodically if the user never fisishes the upload
     upload_status: 'temp',
     entry_status: 'pending',
@@ -143,7 +144,7 @@ router.post('/', async (req: any, res: any) => {
  */
 router.patch('/', async (req: any, res: any) => {
   console.log('req', req.body)
-  const { id, name, description, tags } = req.body
+  const { id, name, description, tags, isBookmarked } = req.body
   if (!id) {
     return res.status(400).json({ error: 'No id provided' })
   }
@@ -152,6 +153,7 @@ router.patch('/', async (req: any, res: any) => {
     description,
     tags,
     entry_status: 'completed',
+    isBookmarked,
     lastModified: new Date(),
   }
   const result = await dbImagesCollection.updateOne({ _id: new ObjectId(id) }, { $set: imageMeta })

@@ -7,7 +7,7 @@ import { BackgroundUploadProvider } from '@web/components/BackgroundUploadOverla
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="vsc-initialized">
+      <body className="vsc-initialized bg-asq-bg">
         <BackgroundUploadProvider>
           <AntdPatchWrapper>{children}</AntdPatchWrapper>
         </BackgroundUploadProvider>
