@@ -1,9 +1,9 @@
 # Airsquire fullstack engineer interview project
 
-|                      |                           |
-| -------------------- | ------------------------- |
-| **Fork's Author**:   | Romson (Woods) Preechawit |
-| Last Readme Updated: | 2025-05-08                |
+| **Fork's Author**:   | Romson (Woods) Preechawit       |
+| -------------------- | ------------------------------- |
+| Last Readme Updated: | 2025-05-08                      |
+| Tested On:           | macOS 15.4.1, M2 Max with 64 GB |
 
 ## Submission
 
