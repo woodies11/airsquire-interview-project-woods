@@ -35,4 +35,14 @@ router.post('/', async (req: any, res: any) => {
   return res.status(200).json({ success: true, imageId, newIsBookmarked })
 })
 
+router.get('/stat', async (_: any, res: any) => {
+  // return number of bookmarks and total number of images
+  const totalImages = await dbImagesCollection.countDocuments({ entry_status: 'completed' })
+  const totalBookmarks = await dbImagesCollection.countDocuments({
+    entry_status: 'completed',
+    isBookmarked: true,
+  })
+  return res.status(200).json({ success: true, totalImages, totalBookmarks })
+})
+
 export default router
