@@ -164,11 +164,25 @@ router.patch('/', async (req: any, res: any) => {
   res.json({ success: true })
 })
 
-router.get('/', async (_, res) => {
-  const data = await dbImagesCollection
-    .find({ entry_status: 'completed' })
-    .sort({ uploadedAt: -1 })
-    .toArray()
+router.get('/', async (req, res) => {
+  const { bookmarked, name } = req.query
+
+  const query: any = {
+    entry_status: 'completed',
+  }
+
+  if (bookmarked === '1') {
+    query.isBookmarked = true
+  } else if (bookmarked === '0') {
+    query.isBookmarked = false
+  }
+
+  if (typeof name === 'string' && name.trim()) {
+    query.name = { $regex: name.trim(), $options: 'i' }
+  }
+
+  const data = await dbImagesCollection.find(query).sort({ uploadedAt: -1 }).toArray()
+
   res.json(data)
 })
 

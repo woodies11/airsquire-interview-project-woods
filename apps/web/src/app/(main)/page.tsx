@@ -5,10 +5,27 @@ import { ImageEntryDTO, ImageEntry, parseImageEntries } from '@airsquire/common/
 import BookmarkToggleButton from '@web/components/clients/BookmarkToggleButton'
 import Link from 'next/link'
 
-export default async function Page() {
-  const res = await fetch(`${BASE_API_URL}/api/images/`, {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>
+}) {
+  const { bookmarked, name } = await searchParams
+
+  const params = new URLSearchParams()
+
+  if (bookmarked === '0' || bookmarked === '1') {
+    params.set('bookmarked', bookmarked)
+  }
+
+  if (name && typeof name === 'string' && name.trim()) {
+    params.set('name', name)
+  }
+
+  const res = await fetch(`${BASE_API_URL}/api/images?${params.toString()}`, {
     method: 'GET',
   })
+
   if (!res.ok) {
     throw new Error('Failed to fetch data')
   }
