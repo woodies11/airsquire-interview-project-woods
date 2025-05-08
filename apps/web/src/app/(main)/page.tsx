@@ -5,6 +5,7 @@ import { ImageEntryDTO, ImageEntry, parseImageEntries } from '@airsquire/common/
 import BookmarkToggleButton from '@web/components/clients/BookmarkToggleButton'
 import Link from 'next/link'
 import ClientSearchBox from './components/ClientSearchBox'
+import ClientBookmarkViewToggle from './components/ClientBookmarkViewToggle'
 
 export default async function Page({
   searchParams,
@@ -37,7 +38,10 @@ export default async function Page({
     <Container>
       <div className="flex flex-col items-center justify-center w-full h-full py-8 text-asq-foreground-light">
         <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
-        <ClientSearchBox />
+        <div className="flex flex-col w-full gap-4">
+          <ClientSearchBox />
+          <ClientBookmarkViewToggle />
+        </div>
         {images?.length > 0 &&
           images.map(image => (
             <Link
