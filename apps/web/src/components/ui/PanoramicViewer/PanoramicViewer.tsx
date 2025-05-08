@@ -84,7 +84,6 @@ export default function PanoramicViewer({ imgSrc: imageUrl }: PanoramicViewerPro
     const handleResize = () => {
       const w = canvasRef.current.clientWidth
       const h = canvasRef.current.clientHeight
-      console.log({ w, h })
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)

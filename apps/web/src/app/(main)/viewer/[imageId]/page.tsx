@@ -21,7 +21,6 @@ export default async function Page({ params }: { params: { imageId: string } }) 
     message.error('Failed to parse image data')
     redirect('/')
   }
-  console.log('image', image)
 
   return (
     <Container className="mt-8">

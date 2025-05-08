@@ -11,7 +11,6 @@ export default function ClientBookmarkViewToggle() {
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString())
-    console.log('isBookmarkedState', isBookmarkedState)
     if (isBookmarkedState === 1) {
       params.set('bookmarked', '1')
     } else if (isBookmarkedState === 0) {

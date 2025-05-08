@@ -17,7 +17,7 @@ app.use(express.json())
 
 // log requests to the console
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`)
+  console.log(`${new Date().toUTCString()}: ${req.method} ${req.url}`)
   next()
 })
 
