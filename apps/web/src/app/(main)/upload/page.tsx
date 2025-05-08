@@ -7,7 +7,6 @@ import { Container } from '@web/components/ui/Container'
 import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 import { Skeleton } from 'antd'
 
-import { PlusOutlined } from '@ant-design/icons'
 import imageCompression from 'browser-image-compression'
 import { useUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
 import { useRouter } from 'next/navigation'
@@ -107,6 +106,11 @@ export default function UploadPage() {
               const tags = form.getFieldValue('tags') || []
               const newTags = [...tags, ...parsedJson.a]
               setAiTags(newTags)
+
+              // if name is still empty, set it to ai suggested name
+              if (!form.getFieldValue('name')) {
+                form.setFieldsValue({ name: parsedJson.n })
+              }
             }
             continue
           }
@@ -276,6 +280,16 @@ export default function UploadPage() {
             <div className="mb-6">
               <h2 className="text-lg font-semibold">AI Description:</h2>
               <p>{aiDescription}</p>
+              {aiDescription.length > 0 && (
+                <Button
+                  className="mt-2"
+                  onClick={() => {
+                    form.setFieldsValue({ description: aiDescription })
+                  }}
+                >
+                  Use this description
+                </Button>
+              )}
             </div>
           )}
           <Form.Item label="Tags" name="tags">
@@ -298,7 +312,6 @@ export default function UploadPage() {
               {aiTagsDisplay.map((tag, index) => (
                 <Tag
                   key={index}
-                  closeIcon={<PlusOutlined />}
                   onClose={e => {
                     e.preventDefault()
                     e.stopPropagation()
@@ -307,7 +320,7 @@ export default function UploadPage() {
                   className="cursor-pointer"
                   onClick={() => handleTagClick(tag)}
                 >
-                  {tag}
+                  {tag} +
                 </Tag>
               ))}
             </div>
