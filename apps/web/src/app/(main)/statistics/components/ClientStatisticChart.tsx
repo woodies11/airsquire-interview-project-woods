@@ -17,7 +17,7 @@ export default function ClientStatisticChart({
   ]
 
   return (
-    <div className="w-full">
+    <div className="w-full h-96 min-h-[50vh]">
       <ResponsiveContainer>
         <PieChart>
           <Pie
@@ -26,7 +26,7 @@ export default function ClientStatisticChart({
             nameKey="name"
             cx="50%"
             cy="50%"
-            outerRadius={100}
+            outerRadius={120}
             label
           >
             {pieData.map((_, index) => (
