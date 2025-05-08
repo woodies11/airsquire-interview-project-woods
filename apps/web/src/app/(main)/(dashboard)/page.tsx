@@ -32,14 +32,24 @@ export default async function Page() {
                   ` gap-4 md:gap-8 items-center justify-center w-full p-4`
                 }
               >
-                <BookmarkToggleButton imageId={image._id} isBookmarked={!!image.isBookmarked} />
+                <span className="w-full h-full hidden md:flex items-center justify-center">
+                  <BookmarkToggleButton imageId={image._id} isBookmarked={!!image.isBookmarked} />
+                </span>
                 <img
                   src={`${BASE_API_URL}/${image.thumbnailUrl}`}
                   alt={image.name}
                   className="w-full max-w-50 mt-4 rounded-lg shadow-lg"
                 />
                 <div className="flex flex-col justify-center w-full h-full gap-2">
-                  <h2 className="text-xl font-semibold">{image.name}</h2>
+                  <h2 className="text-xl font-semibold flex gap-2">
+                    <span className="h-full md:hidden inline translate-y-1">
+                      <BookmarkToggleButton
+                        imageId={image._id}
+                        isBookmarked={!!image.isBookmarked}
+                      />
+                    </span>
+                    {image.name}
+                  </h2>
                   <p className="text-gray-500">Uploaded at: {image.uploadedAt.toLocaleString()}</p>
                   <p className="text-gray-500">
                     Last modified: {image.lastModified.toLocaleString()}

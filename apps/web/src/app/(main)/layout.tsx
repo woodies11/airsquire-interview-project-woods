@@ -1,14 +1,9 @@
-import Link from 'next/link'
-import { NavHeader } from '../../components/ui/NavHeader/NavHeader'
+import NavHeader from '@web/components/ui/NavHeader/NavHeader'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <NavHeader>
-        <span>
-          <Link href="/">Airsquire</Link>
-        </span>
-      </NavHeader>
+      <NavHeader />
       <main>{children}</main>
     </>
   )
