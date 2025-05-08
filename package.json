@@ -3,10 +3,16 @@
   "private": true,
   "type": "module",
   "devDependencies": {
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.0.1",
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "dev": "pnpm --filter airsquire-next-js dev",
-    "build": "pnpm --filter airsquire-next-js build"
+    "mongo": "docker-compose up -d mongo",
+    "mongo:down": "docker-compose down",
+    "dev:api": "pnpm mongo && wait-on tcp:27017 && pnpm --filter airsquire-backend dev",
+    "dev:web": "pnpm --filter airsquire-next-js dev",
+    "dev": "concurrently -k -n mongo,api,web -c yellow,cyan,magenta \"pnpm mongo\" \"pnpm dev:api\" \"pnpm dev:web\"",
+    "build": "pnpm --filter airsquire-backend build && pnpm --filter airsquire-next-js build"
   }
 }
