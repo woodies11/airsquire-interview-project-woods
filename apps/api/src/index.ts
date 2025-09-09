@@ -28,5 +28,5 @@ app.use('/api/bookmarks', bookmarksRoutes)
 app.use('/api/ai', aiRoutes)
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`)
+  console.log(`Node server running at http://localhost:${PORT}`)
 })

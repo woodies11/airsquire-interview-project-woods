@@ -36,6 +36,8 @@ export interface PanoramicViewerRef {
   pausePublishing: () => void
   resumePublishing: () => void
   togglePublishing: () => void
+
+  getCanvasScreenshot: () => string
 }
 
 const PanoramicViewer = forwardRef(function PanoramicViewer(
@@ -51,6 +53,13 @@ const PanoramicViewer = forwardRef(function PanoramicViewer(
   const publishingRef = useRef(publish)
 
   const shouldSuppressPublishing = useRef(false)
+
+  const getCanvasScreenshot = () => {
+    if (!canvasRef.current) return ''
+    const canvas = canvasRef.current.querySelector('canvas')
+    if (!canvas) return ''
+    return canvas.toDataURL('image/jpeg', 0.8)
+  }
 
   // get current pose
   const getPose: PanoramicViewerRef['getPose'] = () => {
@@ -93,6 +102,7 @@ const PanoramicViewer = forwardRef(function PanoramicViewer(
     (): PanoramicViewerRef => ({
       getPose,
       setPose,
+      getCanvasScreenshot,
       pausePublishing: () => {
         publishingRef.current = false
       },
@@ -116,7 +126,7 @@ const PanoramicViewer = forwardRef(function PanoramicViewer(
       0.1,
       1000
     )
-    const renderer = new WebGLRenderer({ antialias: true })
+    const renderer = new WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
     renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight)
     canvasRef.current.appendChild(renderer.domElement)
 

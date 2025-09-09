@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, PropsWithChildren, useContext, useState } from 'react'
+import {
+  createContext,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useContext,
+  useState,
+} from 'react'
 import FloatingAIPane from './FloatingAIPane'
 
 type FloatingAIPaneContextType = {
@@ -8,6 +15,9 @@ type FloatingAIPaneContextType = {
   openAIPanel: () => void
   closeAIPanel: () => void
   toggleAIPanel: () => void
+
+  aiResponse: string
+  setAIResponse: Dispatch<SetStateAction<string>>
 }
 
 const initialValues = {
@@ -15,6 +25,9 @@ const initialValues = {
   openAIPanel: () => {},
   closeAIPanel: () => {},
   toggleAIPanel: () => {},
+
+  aiResponse: '',
+  setAIResponse: () => {},
 }
 
 export const FloatingAIPaneContext = createContext<FloatingAIPaneContextType>(initialValues)
@@ -26,8 +39,12 @@ function FloatingAIPaneContextProvider({ children }: PropsWithChildren<{}>) {
   const closeAIPanel = () => setIsOpen(false)
   const toggleAIPanel = () => setIsOpen(prev => !prev)
 
+  const [aiResponse, setAIResponse] = useState('')
+
   return (
-    <FloatingAIPaneContext.Provider value={{ isOpen, openAIPanel, closeAIPanel, toggleAIPanel }}>
+    <FloatingAIPaneContext.Provider
+      value={{ isOpen, openAIPanel, closeAIPanel, toggleAIPanel, aiResponse, setAIResponse }}
+    >
       {children}
 
       <FloatingAIPane />

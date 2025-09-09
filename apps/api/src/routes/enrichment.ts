@@ -1,4 +1,5 @@
 import express from 'express'
+import fileUpload from 'express-fileupload'
 import fs from 'fs'
 import { ObjectId } from 'mongodb'
 import OpenAI from 'openai'
@@ -38,7 +39,110 @@ Do not include any other information or explanations in the response.
 Do not make up any information in the response. If you cannot identify something simply say so.
 `
 
+const IMAGE_COMPARE_PROMPT = `
+This will be used for an MVP feature to showcase the *potential* of AI in construction.
+Hence, use confidence languages. Information will not actually be used so minor inaccuracies are acceptable.
+
+You are a project manager overseeing a construction project. Your will be sent a set of paranomic 360 degree images of the construction site taken at some interval apart.
+
+As the project manager overseeing the construction team, you want to create a progress report to be sent to stakeholders, summarizing and highlighting what your team has done and the progress accomplished thus far.
+Keep this in mind and use the appropriate tone and point of interest when crafting your report.
+
+**Your main task is to:**
+
+Start off with a high-level summary of the overall progress of the construction site.
+
+1. Analyze each images and make sure they are all from the same construction site and spot
+2. Identify any changes or progress in the construction site between the images
+3. Generate a report summarizing your findings, specifically what have been done between each images
+4. DO NOT make up any information. If you are not sure, imply say so.
+5. Reply in Markdown format, with proper headings and sections.
+6. Be clear and concise, keep things as short as possible.
+
+
+**IMPORTANT**: Do not include any placeholder, recommended next steps, or remark/hesitation in the report. This is a tech showcase, so sound confident.
+`
+
 const router = express.Router()
+
+router.use(
+  fileUpload({
+    createParentPath: true,
+    useTempFiles: true,
+    tempFileDir: 'tmp/',
+  })
+)
+
+router.post('/compare', async (req: any, res: any) => {
+  const { imgA, imgB } = req.files
+
+  if (!imgA || !imgB) {
+    return res.status(400).json({ error: 'Two images are required' })
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+
+  res.write('%%SYSTEM%%: Starting image comparison...$$\n')
+
+  const bufferA = fs.readFileSync(imgA.tempFilePath)
+  const bufferB = fs.readFileSync(imgB.tempFilePath)
+
+  // convert to base64 strings with proper prefix
+  const base64imgA = `data:${imgA.mimetype};base64,${bufferA.toString('base64')}`
+  const base64imgB = `data:${imgB.mimetype};base64,${bufferB.toString('base64')}`
+
+  if (!base64imgA || !base64imgB) {
+    return res.status(400).json({ error: 'Failed to convert images to base64' })
+  }
+
+  const messages: ChatCompletionMessageParam[] = [
+    {
+      role: 'system',
+      content: [{ type: 'text', text: IMAGE_COMPARE_PROMPT }],
+    },
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'image_url',
+          image_url: { url: base64imgA },
+        },
+        {
+          type: 'image_url',
+          image_url: { url: base64imgB },
+        },
+      ],
+    },
+  ]
+
+  try {
+    console.log('Starting image comparison stream...')
+    for await (const chunk of compareImages(messages)) {
+      res.write(`%%DATA%%:${chunk}$$`)
+    }
+    res.end()
+  } catch (err) {
+    console.error('Streaming error:', err)
+    res.write('%%ERROR%%: error\ndata: Error during OpenAI stream$$\n')
+    res.end()
+  }
+})
+
+async function* compareImages(messages: ChatCompletionMessageParam[]) {
+  const responseStream = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: messages,
+    stream: true,
+  })
+  console.log('received responseStream...')
+
+  for await (const chunk of responseStream) {
+    const content = chunk.choices?.[0]?.delta?.content
+    if (content) yield content
+  }
+}
 
 router.post('/', async (req: any, res: any) => {
   const { imageId } = req.body

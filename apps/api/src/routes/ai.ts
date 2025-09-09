@@ -1,5 +1,4 @@
 import express from 'express'
-import OpenAI from 'openai'
 
 const router = express.Router()
 

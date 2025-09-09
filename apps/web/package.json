@@ -28,7 +28,9 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.176.0",
     "clsx": "^2.1.1",
-    "motion": "^12.23.12"
+    "motion": "^12.23.12",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "22.15.3",
