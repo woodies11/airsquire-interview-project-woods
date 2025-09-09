@@ -11,6 +11,7 @@ import imageCompression from 'browser-image-compression'
 import { useBackgroundUpload } from '@web/components/BackgroundUploadOverlay/BackgroundUploadProvider'
 import { useRouter } from 'next/navigation'
 import { BASE_API_URL } from 'apps/web/configs'
+import { toSHA256 } from '@web/utils/files'
 
 const fileEventHandler = (e: any) => {
   if (Array.isArray(e)) {
@@ -125,14 +126,6 @@ export default function UploadPage() {
     }
   }, [uploadId])
 
-  const toSHA256 = async (file: File): Promise<string> => {
-    const buffer = await file.arrayBuffer()
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-    return hashHex
-  }
-
   const sendInitialUploadRequest = async (file: File, sha256: string) => {
     // Send a smaller version of the image to the server first to kickstart the enrichment process
     // and create a placeholder entry in the database
@@ -234,7 +227,7 @@ export default function UploadPage() {
     <div className="w-full min-h-[calc(100vh+20rem)] flex flex-col items-center">
       {hasSelectedImage && (
         <Container className="mt-8">
-          <PanoramicViewer imgSrc={previewImage} />
+          <PanoramicViewer autoPan imgSrc={previewImage} />
         </Container>
       )}
       <div className="w-full p-4 max-w-2xl mx-auto mt-2">

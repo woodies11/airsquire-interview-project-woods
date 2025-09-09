@@ -16,11 +16,14 @@ export default function NavHeader() {
         <Link href="/statistics" className="text-md font-medium hover:text-asq-accent">
           Statistics
         </Link>
+        <Link href="/upload" className="text-md font-medium hover:text-asq-accent">
+          Upload
+        </Link>
         <Link
-          href="/upload"
+          href="/analysis"
           className="text-lg font-medium hover:text-asq-accent px-4 py-1 bg-asq-accent rounded-full text-asq-foreground-light duration-500 hover:bg-asq-accent-secondary"
         >
-          Upload
+          AI Analysis
         </Link>
       </div>
     </nav>
