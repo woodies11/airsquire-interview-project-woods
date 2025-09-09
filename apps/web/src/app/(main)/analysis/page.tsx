@@ -170,6 +170,10 @@ export default function AnalysisPage() {
   }, [handleFiles])
 
   const removeImage = (index: number) => {
+    if (images.length <= 2) {
+      setLeftIndex(null)
+      setRightIndex(null)
+    }
     setImages(prev => prev.filter((_, i) => i !== index))
     if (leftIndex === index) {
       setLeftIndex(null)
@@ -290,7 +294,7 @@ export default function AnalysisPage() {
               className="cursor-pointer rounded-full p-2 bg-white shadow-2xl text-sm active:scale-95"
               onClick={handleScreenshot}
             >
-              Segment Image
+              Highlight
             </button>
             {/* <button
               className="cursor-pointer rounded-full p-2 bg-white shadow-2xl text-sm active:scale-95"
