@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: { imageId: string } }) 
   return (
     <Container className="mt-8">
       <div className="flex flex-col items-center justify-center w-full h-full text-asq-foreground-light gap-4">
-        <PanoramicViewer imgSrc={`${BASE_API_URL}/${image.imageUrl}`} />
+        <PanoramicViewer autoPan imgSrc={`${BASE_API_URL}/${image.imageUrl}`} />
         <div className="grid grid-cols-1 gap-4 max-w-4xl w-full">
           <h1 className="text-2xl font-semibold place-self-center items-center justify-center flex gap-2">
             <BookmarkToggleButton imageId={image._id} isBookmarked={image.isBookmarked} />{' '}

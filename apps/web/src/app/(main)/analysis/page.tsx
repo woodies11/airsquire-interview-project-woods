@@ -1,16 +1,21 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import imageCompression from 'browser-image-compression'
 import { FaTimes, FaArrowLeft, FaArrowRight } from 'react-icons/fa'
-import PanoramicViewer from '@web/components/ui/PanoramicViewer/PanoramicViewer'
+import PanoramicViewer, {
+  PanoramicViewerRef,
+} from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 import clsx from 'clsx'
 
 export default function AnalysisPage() {
   const [images, setImages] = useState<{ name: string; base64: string }[]>([])
 
   const [leftIndex, setLeftIndex] = useState<number | null>(0)
-  const [rightIndex, setRightIndex] = useState<number | null>(null)
+  const [rightIndex, setRightIndex] = useState<number | null>(1)
+
+  const leftViewerRef = useRef<PanoramicViewerRef>(null)
+  const rightViewerRef = useRef<PanoramicViewerRef>(null)
 
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files) return
@@ -85,11 +90,36 @@ export default function AnalysisPage() {
   return (
     <div className="w-full min-h-[calc(100vh+20rem)] flex flex-col items-center p-4 gap-4">
       {images.length > 1 && (
-        <div className={clsx('my-4 w-full grid gap-1 grid-cols-2 h-[80vh]')}>
-          <PanoramicViewer publish channel="abx" imgSrc={images[leftIndex].base64} />
+        <div className={clsx('my-4 w-full grid gap-1 grid-cols-2 h-[80vh] relative')}>
+          <PanoramicViewer
+            ref={leftViewerRef}
+            publish
+            channel="abx"
+            imgSrc={images[leftIndex].base64}
+          />
           {rightIndex !== null && (
-            <PanoramicViewer publish channel="abx" imgSrc={images[rightIndex].base64} />
+            <PanoramicViewer
+              ref={rightViewerRef}
+              publish
+              channel="abx"
+              imgSrc={images[rightIndex].base64}
+            />
           )}
+          <div
+            aria-label="panoramic-viewer-controls"
+            className="absolute left-1/2 -translate-x-1/2 bottom-2"
+          >
+            <button
+              className="cursor-pointer rounded-full p-2 bg-white shadow-2xl text-sm active:scale-95"
+              onClick={() => {
+                if (!leftViewerRef.current || !rightViewerRef.current) return
+                leftViewerRef.current.togglePublishing()
+                rightViewerRef.current.togglePublishing()
+              }}
+            >
+              Toggle Sync
+            </button>
+          </div>
         </div>
       )}
       <div className="grid grid-cols-3 gap-4 w-full max-w-4xl">

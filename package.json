@@ -8,11 +8,10 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "mongo": "docker-compose up",
-    "mongo:down": "docker-compose down",
     "dev:api": "pnpm --filter airsquire-backend dev",
     "dev:web": "pnpm --filter airsquire-next-js dev",
-    "dev": "concurrently -k -n mongo,api,web -c yellow,cyan,magenta \"pnpm mongo\" \"pnpm dev:api\" \"pnpm dev:web\"",
+    "dev:py": "python -m uvicorn apps.pycv.app:app --host 0.0.0.0 --port 4021 --reload",
+    "dev": "concurrently -k -n py,api,web -c green,cyan,magenta \"pnpm dev:py\" \"pnpm dev:api\" \"pnpm dev:web\"",
     "build": "pnpm --filter airsquire-backend build && pnpm --filter airsquire-next-js build"
   }
 }

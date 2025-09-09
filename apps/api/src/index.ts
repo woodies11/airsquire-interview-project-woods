@@ -2,6 +2,7 @@ import cors from 'cors'
 import * as dotenv from 'dotenv'
 import express from 'express'
 import path from 'path'
+import aiRoutes from './routes/ai.js'
 import bookmarksRoutes from './routes/bookmarks.js'
 import enrichmentRoutes from './routes/enrichment.js'
 import imagesRoutes from './routes/images.js'
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 app.use('/api/images', imagesRoutes)
 app.use('/api/enrichment', enrichmentRoutes)
 app.use('/api/bookmarks', bookmarksRoutes)
+app.use('/api/ai', aiRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)

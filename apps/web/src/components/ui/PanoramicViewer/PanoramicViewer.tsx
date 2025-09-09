@@ -35,6 +35,7 @@ export interface PanoramicViewerRef {
   }) => void
   pausePublishing: () => void
   resumePublishing: () => void
+  togglePublishing: () => void
 }
 
 const PanoramicViewer = forwardRef(function PanoramicViewer(
@@ -97,6 +98,9 @@ const PanoramicViewer = forwardRef(function PanoramicViewer(
       },
       resumePublishing: () => {
         publishingRef.current = true
+      },
+      togglePublishing: () => {
+        publishingRef.current = !publishingRef.current
       },
     })
   )
