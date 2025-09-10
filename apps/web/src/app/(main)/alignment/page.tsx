@@ -1,20 +1,21 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import imageCompression from 'browser-image-compression'
-import { FaTimes, FaArrowLeft, FaArrowRight } from 'react-icons/fa'
-import PanoramicViewer, {
-  PanoramicViewerRef,
-} from '@web/components/ui/PanoramicViewer/PanoramicViewer'
 import clsx from 'clsx'
 import { BASE_API_URL, PYTHON_SVC_URL } from 'apps/web/configs'
-import { Markdown } from '@web/components/markdown'
-import { useFloatingAIPaneContext } from '@web/components/FloatingAIPane/FloatingAIPaneContextProvider'
 import { base64ToFile } from '@web/utils/files'
 import { AnimatePresence, motion } from 'motion/react'
 
+/**
+ * Change to true to upload images at original size (slower but good if we want to download the result for later use).
+ */
+const SHOULD_UPLOAD_ORIGINAL = false
+
 export default function AlignmentPage() {
-  const [images, setImages] = useState<{ name: string; base64: string; file: File }[]>([])
+  const [images, setImages] = useState<
+    { name: string; base64: string; file: File; original: File }[]
+  >([])
   const [alignedImage, setAlignedImage] = useState<Record<number, string | null>>({})
   const [isAlignmentInProgress, setIsAlignmentInProgress] = useState(false)
 
@@ -40,7 +41,7 @@ export default function AlignmentPage() {
             reader.readAsDataURL(compressed)
           })
 
-          return { name: file.name, base64, file: compressed }
+          return { name: file.name, base64, file: compressed, original: file }
         } catch (e) {
           console.error('Compression error:', e)
           return null
@@ -53,6 +54,7 @@ export default function AlignmentPage() {
         name: string
         base64: string
         file: File
+        original: File
       }[]
 
       setImages(prev => [...prev, ...compressedBase64Array])
@@ -88,6 +90,21 @@ export default function AlignmentPage() {
     [setRefIndex, isAlignmentInProgress]
   )
 
+  const handleDownloadAll = useCallback(() => {
+    images.forEach((img, idx) => {
+      const alignedBase64 = alignedImage[idx] || img.base64
+      const file = base64ToFile(alignedBase64, 'aligned_' + img.name)
+      const url = URL.createObjectURL(file)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = img.name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    })
+  }, [images, alignedImage])
+
   useEffect(() => {
     if (refIndex === null) return
     if (images.length < 2) return
@@ -110,8 +127,13 @@ export default function AlignmentPage() {
         alignmentTasks.push(async () => {
           try {
             const formData = new FormData()
-            formData.append('ref_img', images[refIndex].file, images[refIndex].name)
-            formData.append('input_img', img.file, img.name)
+            const refImg = SHOULD_UPLOAD_ORIGINAL
+              ? images[refIndex].original
+              : images[refIndex].file
+            const inputImg = SHOULD_UPLOAD_ORIGINAL ? img.original : img.file
+            formData.append('ref_img', refImg, images[refIndex].name)
+            formData.append('input_img', inputImg, img.name)
+
             const res = await fetch(`${PYTHON_SVC_URL}/align`, {
               method: 'POST',
               body: formData,
@@ -218,6 +240,20 @@ export default function AlignmentPage() {
             onClick={handleClearAll}
           >
             Clear All
+          </button>
+        </div>
+      )}
+      {alignedImage && Object.keys(alignedImage).length === images.length && (
+        <div className="flex items-center gap-4">
+          <button
+            className={clsx(
+              'px-4 py-2 bg-asq-primary text-white rounded disabled:opacity-50',
+              isAlignmentInProgress ? 'cursor-not-allowed' : 'hover:bg-asq-accent cursor-pointer'
+            )}
+            disabled={isAlignmentInProgress}
+            onClick={handleDownloadAll}
+          >
+            Download All
           </button>
         </div>
       )}
