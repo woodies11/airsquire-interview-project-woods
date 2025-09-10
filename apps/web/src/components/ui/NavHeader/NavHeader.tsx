@@ -16,9 +16,9 @@ export default function NavHeader() {
         <Link href="/upload" className="text-md font-medium hover:text-asq-accent">
           Upload
         </Link>
-        <Link href="/gallery" className="text-md font-medium hover:text-asq-accent">
+        {/* <Link href="/gallery" className="text-md font-medium hover:text-asq-accent">
           Objects
-        </Link>
+        </Link> */}
         <Link href="/alignment" className="text-md font-medium hover:text-asq-accent">
           Alignment
         </Link>

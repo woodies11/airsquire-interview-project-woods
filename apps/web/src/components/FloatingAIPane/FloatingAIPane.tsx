@@ -17,7 +17,7 @@ export default function FloatingAIPane() {
       <motion.div
         ref={dragRef}
         aria-label="ai-panel-drag-constraint"
-        className="fixed inset-5 pointer-events-none"
+        className="fixed top-0 left-0 right-0 h-[150vh] pointer-events-none"
       ></motion.div>
       <div className="fixed inset-5 pointer-events-none z-999">
         <div className="w-full h-full relative pointer-events-none">

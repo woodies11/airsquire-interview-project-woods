@@ -58,7 +58,7 @@ Start off with a high-level summary of the overall progress of the construction 
 4. DO NOT make up any information. If you are not sure, imply say so.
 5. Reply in Markdown format, with proper headings and sections.
 6. Be clear and concise, keep things as short as possible.
-
+7. Refer to the first image as "Left Image" and the second image as "Right Image" in your report.
 
 **IMPORTANT**: Do not include any placeholder, recommended next steps, or remark/hesitation in the report. This is a tech showcase, so sound confident.
 `

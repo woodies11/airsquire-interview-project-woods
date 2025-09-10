@@ -39,7 +39,6 @@ export default function AnalysisPage() {
       console.log('Sending images to AI for comparison...')
       setIsLoadingAIResponse(true)
       setAIResponse('')
-      openAIPanel()
 
       const formData = new FormData()
       formData.append('imgA', leftImage.file, leftImage.name)
@@ -65,22 +64,26 @@ export default function AnalysisPage() {
         if (!isSubscribed) return
 
         let hasTriggeredScreenshot = false
+        let hasOpenAIPanel = false
 
         while (true) {
           const { done, value } = await reader.read()
           if (!isSubscribed) return
           if (done) break
 
-          if (!leftMask && !rightMask && !hasTriggeredScreenshot) {
-            handleScreenshot()
-            hasTriggeredScreenshot = true
-          }
-
           const lines = decoder.decode(value).split('$$')
 
           for (const line of lines) {
             if (line.startsWith('%%DATA%%:')) {
               const desc = line.replace('%%DATA%%:', '')
+              if (!leftMask && !rightMask && !hasTriggeredScreenshot) {
+                handleScreenshot()
+                hasTriggeredScreenshot = true
+              }
+              if (!hasOpenAIPanel) {
+                openAIPanel()
+                hasOpenAIPanel = true
+              }
 
               setAIResponse(prev => {
                 return (prev += desc)
@@ -237,6 +240,23 @@ export default function AnalysisPage() {
     })
   }
 
+  useEffect(() => {
+    if (images.length === 0) {
+      setLeftIndex(null)
+      setRightIndex(null)
+      setLeftMask(null)
+      setRightMask(null)
+    } else if (images.length === 1) {
+      setLeftIndex(0)
+      setRightIndex(null)
+      setLeftMask(null)
+      setRightMask(null)
+    } else {
+      if (leftIndex === null) setLeftIndex(0)
+      if (rightIndex === null) setRightIndex(images.length > 1 ? 1 : null)
+    }
+  }, [images])
+
   return (
     <div className="w-full min-h-[calc(100vh+20rem)] flex flex-col items-center p-4 gap-4">
       {images.length > 1 && (
@@ -251,7 +271,7 @@ export default function AnalysisPage() {
             ref={leftViewerRef}
             publish
             channel="abx"
-            imgSrc={images[leftIndex].base64}
+            imgSrc={images[leftIndex]?.base64 ?? ''}
           />
           <AnimatePresence>
             {leftMask && (
@@ -284,7 +304,7 @@ export default function AnalysisPage() {
               ref={rightViewerRef}
               publish
               channel="abx"
-              imgSrc={images[rightIndex].base64}
+              imgSrc={images[rightIndex]?.base64 ?? ''}
             />
           )}
           <div
