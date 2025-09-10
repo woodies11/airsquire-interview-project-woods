@@ -168,6 +168,7 @@ export default function AlignmentPage() {
 
   useEffect(() => {
     setRefIndex(null)
+    setAlignedImage({})
   }, [images])
 
   const handleClearAll = useCallback(() => {
@@ -243,20 +244,22 @@ export default function AlignmentPage() {
           </button>
         </div>
       )}
-      {alignedImage && Object.keys(alignedImage).length === images.length && (
-        <div className="flex items-center gap-4">
-          <button
-            className={clsx(
-              'px-4 py-2 bg-asq-primary text-white rounded disabled:opacity-50',
-              isAlignmentInProgress ? 'cursor-not-allowed' : 'hover:bg-asq-accent cursor-pointer'
-            )}
-            disabled={isAlignmentInProgress}
-            onClick={handleDownloadAll}
-          >
-            Download All
-          </button>
-        </div>
-      )}
+      {SHOULD_UPLOAD_ORIGINAL &&
+        !!alignedImage &&
+        Object.keys(alignedImage).length === images.length && (
+          <div className="flex items-center gap-4">
+            <button
+              className={clsx(
+                'px-4 py-2 bg-asq-primary text-white rounded disabled:opacity-50',
+                isAlignmentInProgress ? 'cursor-not-allowed' : 'hover:bg-asq-accent cursor-pointer'
+              )}
+              disabled={isAlignmentInProgress}
+              onClick={handleDownloadAll}
+            >
+              Download All
+            </button>
+          </div>
+        )}
       <div
         className="w-full max-w-4xl border-2 border-dashed border-gray-400 rounded-lg p-10 text-center cursor-pointer hover:border-blue-500 transition-colors"
         onDrop={handleDrop}
