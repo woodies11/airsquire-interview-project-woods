@@ -106,9 +106,18 @@ async def process_image(file: UploadFile = File(...)):
 
         boxes_sorted = sorted(bboxes, key=lambda b: b[2] * b[3], reverse=True)
         kept = []
+        img_area = W * H
         for i, b in enumerate(boxes_sorted):
             discard = False
             for bigger in kept:  # only compare with already-kept larger boxes
+                bigger_area = bigger[2] * bigger[3]
+                # if the bigger box is too big relative to the image, skip IoU check
+                if bigger_area > 0.6 * img_area:
+                    continue
+                b_area = b[2] * b[3]
+                # if the bigger box is much larger than this one, also skip IoU check
+                if bigger_area > 3 * b_area:
+                    continue
                 if iou(bigger, b) >= 0.8:
                     discard = True
                     break
