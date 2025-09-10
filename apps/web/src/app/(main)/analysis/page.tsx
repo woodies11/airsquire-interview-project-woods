@@ -26,46 +26,6 @@ export default function AnalysisPage() {
 
   const [isLoadingAIResponse, setIsLoadingAIResponse] = useState(false)
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files) return
-
-      const fileArray = Array.from(files)
-      const compressedBase64Promises = fileArray.map(async file => {
-        try {
-          const compressed = await imageCompression(file, {
-            maxSizeMB: 5,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-          })
-
-          const base64 = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onloadend = () => resolve(reader.result as string)
-            reader.onerror = reject
-            reader.readAsDataURL(compressed)
-          })
-
-          return { name: file.name, base64, file: compressed }
-        } catch (e) {
-          console.error('Compression error:', e)
-          return null
-        }
-      })
-
-      const compressedBase64Array = (await Promise.all(compressedBase64Promises)).filter(
-        Boolean
-      ) as {
-        name: string
-        base64: string
-        file: File
-      }[]
-
-      setImages(prev => [...prev, ...compressedBase64Array])
-    },
-    [setImages]
-  )
-
   useEffect(() => {
     if (images.length === 0) return
     if (leftIndex === null || rightIndex === null || leftIndex === rightIndex) return
@@ -149,6 +109,46 @@ export default function AnalysisPage() {
     }
   }, [leftIndex, rightIndex, images])
 
+  const handleFiles = useCallback(
+    async (files: FileList | null) => {
+      if (!files) return
+
+      const fileArray = Array.from(files)
+      const compressedBase64Promises = fileArray.map(async file => {
+        try {
+          const compressed = await imageCompression(file, {
+            maxSizeMB: 5,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          })
+
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onloadend = () => resolve(reader.result as string)
+            reader.onerror = reject
+            reader.readAsDataURL(compressed)
+          })
+
+          return { name: file.name, base64, file: compressed }
+        } catch (e) {
+          console.error('Compression error:', e)
+          return null
+        }
+      })
+
+      const compressedBase64Array = (await Promise.all(compressedBase64Promises)).filter(
+        Boolean
+      ) as {
+        name: string
+        base64: string
+        file: File
+      }[]
+
+      setImages(prev => [...prev, ...compressedBase64Array])
+    },
+    [setImages]
+  )
+
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault()
@@ -206,6 +206,7 @@ export default function AnalysisPage() {
   const handleScreenshot = async () => {
     if (!leftViewerRef.current || !rightViewerRef.current) return
     setLeftMask(null)
+    setRightMask(null)
     const leftImg = leftViewerRef.current.getCanvasScreenshot()
     const rightImg = rightViewerRef.current.getCanvasScreenshot()
 

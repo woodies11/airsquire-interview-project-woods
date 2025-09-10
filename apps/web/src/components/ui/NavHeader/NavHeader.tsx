@@ -13,11 +13,14 @@ export default function NavHeader() {
         <Link href="/" className="text-md font-medium hover:text-asq-accent">
           Home
         </Link>
-        <Link href="/statistics" className="text-md font-medium hover:text-asq-accent">
-          Statistics
-        </Link>
         <Link href="/upload" className="text-md font-medium hover:text-asq-accent">
           Upload
+        </Link>
+        <Link href="/gallery" className="text-md font-medium hover:text-asq-accent">
+          Objects
+        </Link>
+        <Link href="/alignment" className="text-md font-medium hover:text-asq-accent">
+          Alignment
         </Link>
         <Link
           href="/analysis"
