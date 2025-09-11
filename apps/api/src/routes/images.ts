@@ -177,8 +177,12 @@ router.get('/', async (req, res) => {
     query.isBookmarked = false
   }
 
+  // also show matching tags
   if (typeof name === 'string' && name.trim()) {
-    query.name = { $regex: name.trim(), $options: 'i' }
+    query.$or = [
+      { name: { $regex: name.trim(), $options: 'i' } },
+      { tags: { $regex: name.trim(), $options: 'i' } },
+    ]
   }
 
   const data = await dbImagesCollection.find(query).sort({ uploadedAt: -1 }).toArray()
